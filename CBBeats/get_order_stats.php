@@ -20,12 +20,12 @@ if (!isset($_SESSION['admin_email'])) {
 */
 $queryRevenue = "
 SELECT
-    IFNULL(SUM(CASE WHEN order_date >= CURDATE() - INTERVAL 7 DAY THEN total ELSE 0 END), 0) AS weekly_revenue,
-    IFNULL(SUM(CASE WHEN MONTH(order_date) = MONTH(CURDATE()) AND YEAR(order_date) = YEAR(CURDATE()) THEN total ELSE 0 END), 0) AS monthly_revenue,
+    IFNULL(SUM(CASE WHEN DATE(order_date) >= CURDATE() - INTERVAL 7 DAY THEN total ELSE 0 END), 0) AS weekly_revenue,
+    IFNULL(SUM(CASE WHEN DATE(order_date) >= DATE_FORMAT(CURDATE() ,'%Y-%m-01') THEN total ELSE 0 END), 0) AS monthly_revenue,
     IFNULL(SUM(CASE WHEN YEAR(order_date) = YEAR(CURDATE()) THEN total ELSE 0 END), 0) AS annual_revenue,
-    IFNULL(COUNT(CASE WHEN order_date = CURDATE() THEN 1 ELSE NULL END), 0) AS orders_today,
-    IFNULL(COUNT(CASE WHEN order_date >= CURDATE() - INTERVAL 7 DAY THEN 1 ELSE NULL END), 0) AS orders_this_week,
-    IFNULL(COUNT(CASE WHEN MONTH(order_date) = MONTH(CURDATE()) AND YEAR(order_date) = YEAR(CURDATE()) THEN 1 ELSE NULL END), 0) AS orders_this_month
+    IFNULL(SUM(CASE WHEN DATE(order_date) = CURDATE() THEN 1 ELSE 0 END), 0) AS orders_today,
+    IFNULL(SUM(CASE WHEN DATE(order_date) >= CURDATE() - INTERVAL 7 DAY THEN 1 ELSE 0 END), 0) AS orders_this_week,
+    IFNULL(SUM(CASE WHEN MONTH(order_date) = MONTH(CURDATE()) AND YEAR(order_date) = YEAR(CURDATE()) THEN 1 ELSE 0 END), 0) AS orders_this_month
 FROM orders
 WHERE status = 'Completed'
 ";

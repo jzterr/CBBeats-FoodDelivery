@@ -55,7 +55,48 @@ document.addEventListener('DOMContentLoaded', () => {
     panel.style.display = (panel === homePanel) ? 'flex' : 'block';
   }
   homeButton.addEventListener('click', () => showHomePanel(homePanel));
-  historyButton.addEventListener('click', () => showHomePanel(historyContainer));
+  historyButton.addEventListener('click', () => {
+    showHomePanel(historyContainer);
+    loadStatsData();
+  });
+  async function loadStatsData() {
+    // Show a quick loading state
+    historyContainer.querySelector('.stats').style.opacity = '0.5';
+
+    try {
+      const res  = await fetch('get_order_stats.php');
+      const json = await res.json();
+      if (json.status !== 'success') {
+        throw new Error(json.message || 'Unknown server error');
+      }
+
+      const s = json.revenue_stats;
+      // Update revenue & counts
+      document.getElementById('weeklyRevenue').textContent  = '₱' + s.weekly_revenue;
+      document.getElementById('monthlyRevenue').textContent = '₱' + s.monthly_revenue;
+      document.getElementById('annualRevenue').textContent  = '₱' + s.annual_revenue;
+      document.getElementById('ordersPerDay').textContent   = s.orders_today;
+      document.getElementById('ordersPerWeek').textContent  = s.orders_this_week;
+      document.getElementById('ordersPerMonth').textContent = s.orders_this_month;
+
+      // Rebuild the “Most Likely Foods” list
+      const list = document.getElementById('mostLikelyFoods');
+      list.innerHTML = '';
+      json.top_foods.forEach(food => {
+        const li = document.createElement('li');
+        li.textContent = `${food.food} – ${food.total_sold}`;
+        list.appendChild(li);
+      });
+    } catch (err) {
+      console.error('Error loading stats:', err);
+      // Optionally show a user‐facing error
+      historyContainer.querySelector('.stats').innerHTML =
+        '<p class="error">Failed to load stats. Please try again.</p>';
+    } finally {
+      // restore opacity
+      historyContainer.querySelector('.stats').style.opacity = '1';
+    }
+  }
 
   /* ============================
      History Panel Functionality
