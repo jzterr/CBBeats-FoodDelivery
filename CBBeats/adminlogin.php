@@ -9,7 +9,7 @@
 <body>
     <!-- ➤ Back button -->
   <div class="back-btn-wrapper">
-    <a href="index.html" class="back-btn">
+    <a href="index.php" class="back-btn">
       &#8592; Home
     </a>
   </div>
